@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+    package="net.petterhj.android.ruterdashclock">
+
+    <uses-sdk 
+        android:minSdkVersion="17" 
+        android:targetSdkVersion="17" />
+
+	<uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <application 
+        android:label="@string/app_name"
+        android:icon="@drawable/ic_extension_ruter"
+        android:theme="@android:style/Theme.Holo.Light.DarkActionBar" 
+        android:allowBackup="false">
+
+        <service 
+            android:name="net.petterhj.android.ruterdashclock.RuterExtension"
+            android:icon="@drawable/ic_extension_ruter"
+            android:label="@string/extension_title"
+            android:permission="com.google.android.apps.dashclock.permission.READ_EXTENSION_DATA">
+            <intent-filter>
+                <action android:name="com.google.android.apps.dashclock.Extension" />
+            </intent-filter>
+            <meta-data android:name="protocolVersion" android:value="1" />
+            <meta-data android:name="description" android:value="@string/extension_description" />
+            <meta-data android:name="settingsActivity" android:value=".RuterExtensionSettings" />
+        </service>
+
+        <activity 
+            android:name="net.petterhj.android.ruterdashclock.RuterExtensionSettings"
+            android:label="@string/title_settings"
+            android:exported="true" />
+
+    </application>
+</manifest>
