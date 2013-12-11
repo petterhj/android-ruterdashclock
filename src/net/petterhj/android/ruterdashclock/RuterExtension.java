@@ -10,58 +10,89 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class RuterExtension extends DashClockExtension {
     public static final String PREF_USERNAME = "pref_username";
     public static final String PREF_PASSWORD = "pref_password";
+    public static final String PREF_CARD = "pref_card";
+    
+    String ticket_status = "";
+    String ticket_status_expanded = "";
+    String ticket_status_body = "";
+    
+    boolean ticketValid = false; 
 
     @Override
     protected void onUpdateData(int reason) {
-        // Variables 
-        String ticket_status = "";
-        String ticket_status_expanded = "";
-        String ticket_status_body = "";
-        
-        //= getString(R.string.status_active);
-        //String  = ticket_status + " " + getString(R.string.ticket);
-        //String ticket_status_body = "30-dagersbillett Student, sone 1 til 1\nUtløper 03/08/13, kl. 17:32\n" + username;
-        
         // Get preference values
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         String username = sp.getString(PREF_USERNAME, "");
         String password = sp.getString(PREF_PASSWORD, "");
+        String card = sp.getString(PREF_CARD, "");
         
-        // Get Ruter data
-        RuterClient ruter = new RuterClient();
+        // Update
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        Date date = new Date();
+        String lastUpdate = dateFormat.format(date);
         
-        if(ruter.logIn(username, password)) {
-            // Get ticket data
-            Parser data = new Parser(ruter.getData());
+        // Check if configured
+        if (username == "" || password == "") {
+            ticket_status = getString(R.string.error_config);
+            ticket_status_expanded = getString(R.string.error_config);
+            ticket_status_body = getString(R.string.error_config_username_password_missing);
             
-            ticket_status = "";
-            ticket_status_expanded = "";
-            ticket_status_body = "";
-            
-            for (Ticket ticket : data.getTickets()) {
-                ticket_status = ticket.getStatus();
-                ticket_status_expanded = ticket.getStatus();
-                ticket_status_body = ticket_status_body + ticket.getType() + "\n" + getString(R.string.expires) + " " + ticket.getExpires()[0] + " - " + ticket.getExpires()[1] + "\n";
+        } 
+        else {
+            // Check if card selected in preferences
+            if (card == "") {
+                ticket_status = getString(R.string.error_config);
+                ticket_status_expanded = getString(R.string.error_config);
+                ticket_status_body = getString(R.string.error_config_card_missing);
                 
-                /*
-                System.out.println("\t" + ticket.getNumber());
-                System.out.println("\t - Bruker: " + ticket.getHolder());
-                System.out.println("\t - Kjøpt: " + ticket.getBought());
-                System.out.println("\t - Utløper: " + ticket.getExpires()[0] + " - " + ticket.getExpires()[1]);
-                System.out.println("\t - Fornyes: " + ticket.getRenewal());
-                */
+            } 
+            else {
+                // Don't check until after next expiration                 
+                if(ticketValid == false) {
+                    // Get Ruter data
+                    RuterClient ruter = new RuterClient();
+                    
+                    if(ruter.logIn(username, password)) {
+                        // Get ticket data
+                        Parser data = new Parser(ruter.getData());
+                        
+                        Ticket validTicket = null;
+                        
+                        for (Ticket ticket : data.getTickets()) {
+                            // Get selected card
+                            if (ticket.getNumber().equals(card))
+                                validTicket = ticket;
+                        }
+                        
+                        // Card
+                        if(validTicket != null) {
+                            ticketValid = validTicket.isValid();
+                            ticket_status = validTicket.getStatus();
+                            ticket_status_expanded = validTicket.getStatus();
+                            ticket_status_body = ticket_status_body + validTicket.getType() + "\n" + 
+                                                 getString(R.string.expires) + " " + validTicket.getExpires()[0] + " - " + validTicket.getExpires()[1];
+                        }
+                        else {
+                            ticket_status = getString(R.string.error_unknown_card);
+                            ticket_status_expanded = getString(R.string.error_unknown_card);
+                            ticket_status_body = getString(R.string.error_config_card_missing);
+                        }
+                    } 
+                    else {
+                        // Could not log in
+                        ticket_status = getString(R.string.error);
+                        ticket_status_expanded = getString(R.string.error);
+                        ticket_status_body = getString(R.string.error_login);
+                    }
+                }
             }
         }
-        else {
-            // Could not log in
-            ticket_status = getString(R.string.error);
-            ticket_status_expanded = getString(R.string.error);
-            ticket_status_body = getString(R.string.error_login);
-        }
-        
         
         // Publish the extension data update.
         publishUpdate(new ExtensionData()
@@ -69,7 +100,7 @@ public class RuterExtension extends DashClockExtension {
                 .icon(R.drawable.ic_extension_ruter)
                 .status(ticket_status)
                 .expandedTitle(ticket_status_expanded)
-                .expandedBody(ticket_status_body)
+                .expandedBody(ticket_status_body + "\nOppdatert: " + lastUpdate)
                 .clickIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://ruter.no/minside/"))));
     }
 }
