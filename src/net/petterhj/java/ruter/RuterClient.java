@@ -36,7 +36,7 @@ public class RuterClient {
             data = mypage.asString();
     
             // Return
-            //  Possibly not the best way to check if logged in or not
+            //  Not really the best way to check if logged in or not
             if(mypage.getTitle().contains("MinSide")) {
                 return true;
             }
