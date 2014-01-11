@@ -5,6 +5,7 @@
     <string name="title_settings">Innstillinger for RuterBillett</string>
     <string name="pref_username">Brukernavn</string>
     <string name="pref_password">Passord</string>
+    <string name="pref_card">Kort</string>
     <string name="pref_display">Visning</string>
     <string name="pref_notify">Varsling</string>
     <string name="pref_manual">Sjekk billett manuelt</string>
@@ -17,5 +18,14 @@
     <string name="status_unused">Ubrukt</string>
     
     <string name="error">Feil</string>
+    <string name="error_config">Konfigureringsfeil</string>
+    <string name="error_config_username_password_missing">Vennligst konfigurer brukernavn og passord</string>
+    <string name="error_config_card_missing">Vennligst velg et reisekort</string>
     <string name="error_login">Kunne ikke logge inn! Feil brukernavn eller passord?</string>
+    <string name="error_unknown_card">Ugyldig reisekort</string>
+    
+    <string-array name="pref_test_values">
+        <item>[DITT KORTNUMMER HER]</item>
+        <item></item>
+    </string-array>
 </resources>

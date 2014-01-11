@@ -25,5 +25,6 @@ public class RuterExtensionSettings extends BaseSettingsActivity {
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference(RuterExtension.PREF_USERNAME));
         bindPreferenceSummaryToValue(findPreference(RuterExtension.PREF_PASSWORD));
+        bindPreferenceSummaryToValue(findPreference(RuterExtension.PREF_CARD));
     }
 }
